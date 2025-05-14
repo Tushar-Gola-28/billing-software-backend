@@ -1,0 +1,61 @@
+version: '3.8'
+services:
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
+  mongo:
+    image: mongo:6.0
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  gateway-service:
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
+    container_name: api-gateway
+    ports:
+      - "4001:4001"
+    environment:
+      - NODE_ENV=production 
+    depends_on:
+      - customer-service
+      - event-service
+      - redis
+
+  customer-service:
+    build:
+      context: .
+      dockerfile: customer-service/Dockerfile
+    container_name: customer-service
+    ports:
+      - "4002:4002"
+    environment:
+      - NODE_ENV=production 
+    depends_on:
+      - mongo
+
+  event-service:
+    build:
+      context: .
+      dockerfile: event-service/Dockerfile
+    container_name: event-service
+    ports:
+      - "4003:4003"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/events
+    depends_on:
+      - mongo
+
+volumes:
+  mongo-data:
+    driver: local
+  redis-data:
+    driver: local
