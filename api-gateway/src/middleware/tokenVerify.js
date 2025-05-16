@@ -13,6 +13,14 @@ const verifyToken = async (req, res, next) => {
                 decodeTkn = decodeToken(token)
 
             }
+            // if (req.cookies.access_token) {
+            //     // token = req.headers["authorization"].split(" ")[1]
+            //     // token = req.cookies.access_token
+            //     decodeTkn = decodeToken(token)
+            //     console.log(decodeTkn,"decodeTkn");
+
+
+            // }
             if (!token && req.cookies.refresh_token) {
                 token = req.cookies.refresh_token
                 decodeTkn = decodeRefreshToken(token)
@@ -28,6 +36,7 @@ const verifyToken = async (req, res, next) => {
             if (!decodeTkn.payload.id) {
                 return res.status(400).json(error("Invalid token"))
             }
+            console.log(decodeTkn);
 
             await axios.get(`${process.env.CUSTOMER_SERVICE_URL}/no-auth/verify/${decodeTkn.payload.id}`)
             req.user = decodeTkn.payload.id;

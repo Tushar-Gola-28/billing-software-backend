@@ -213,4 +213,27 @@ const refreshToken = async (_req, _res) => {
     });
     return _res.json(success({ user: existUser, accessToken, refreshToken, planDetails }))
 }
-module.exports = { createVendor, loginUser, verifyUserById, suggestUserOnlyCustomer, addVendorCustomer, refreshToken }
+const logoutUser = async (_req, _res) => {
+    const vendor = _req.headers["parent"]
+    if (!vendor) {
+        return _res.status(400).json(error(400, "Vendor ID is missing in headers."))
+    }
+
+    const existUser = await UserModal.findByIdAndUpdate(vendor, { $inc: { loginCount: -1 } }, { new: true })
+    if (!existUser) {
+        return _res.status(400).json(error(400, "User not found."))
+    }
+    const options = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        path: '/',
+        expires: new Date(0), // Expire immediately
+    };
+
+    _res.clearCookie('access_token', options);
+    _res.clearCookie('refresh_token', options);
+    _res.clearCookie('user', options);
+    _res.clearCookie('plan', options);
+    return _res.json(success("Logged out successfully"))
+}
+module.exports = { createVendor, loginUser, verifyUserById, suggestUserOnlyCustomer, addVendorCustomer, refreshToken, logoutUser }

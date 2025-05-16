@@ -37,6 +37,7 @@ app.use('/service/:service/:version', verifyToken, async (req, res, next) => {
 const serviceMap = {
     customer_service: process.env.CUSTOMER_SERVICE_URL,
     event_service: process.env.EVENT_SERVICE_URL,
+    catalogue_service: process.env.CATALOGUE_SERVICE_URL,
 }
 app.use('/service', (req, res, next) => {
 
@@ -73,12 +74,13 @@ app.use(globalErrorhandler)
 
 const storeVersionInRedis = async () => {
     const getAllData = await VersionModal.find()
-    baseRedisClient.set("versions", JSON.stringify(getAllData))
-    const allPlans = await axios.get(`${process.env.CUSTOMER_SERVICE_URL}/no-auth/plans`)
-    if (allPlans && allPlans.data && allPlans.data._payload) {
-        baseRedisClient.set("plans-list", JSON.stringify(allPlans.data._payload))
+    if (getAllData) {
+        baseRedisClient.set("versions", JSON.stringify(getAllData))
+        const allPlans = await axios.get(`${process.env.CUSTOMER_SERVICE_URL}/no-auth/plans`)
+        if (allPlans && allPlans.data && allPlans.data._payload) {
+            baseRedisClient.set("plans-list", JSON.stringify(allPlans.data._payload))
+        }
     }
-
     //  { EX: 3600 }  
 }
 async function start() {

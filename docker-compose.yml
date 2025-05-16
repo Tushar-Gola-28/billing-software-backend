@@ -53,6 +53,17 @@ services:
       - MONGO_URI=mongodb://mongo:27017/events
     depends_on:
       - mongo
+  catalogue-service:
+    build:
+      context: .
+      dockerfile: catalogue-service/Dockerfile
+    container_name: catalogue-service
+    ports:
+      - "4004:4004"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/catalogue
+    depends_on:
+      - mongo
 
 volumes:
   mongo-data:
