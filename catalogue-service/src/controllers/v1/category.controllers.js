@@ -10,16 +10,27 @@ const addCategory = async (_req, _res) => {
         vendor,
         $or: [
             { name },
-            { code:newCode }
+            { code: newCode }
         ]
     });
     if (exist) {
         const conflictField = exist.name === name ? "name" : "code";
-        return _res.status(400).json(error(`Category with this ${conflictField} already exists for this vendor.`))
+        return _res.status(400).json(error(400, `Category with this ${conflictField} already exists for this vendor.`))
     }
     const create = new CategoryModal({ name, code: newCode, description, handle: handleConverter(name), vendor })
     await create.save()
     return _res.json(success(create))
+
+}
+const updateCategory = async (_req, _res) => {
+    const { name, code, description, _id } = _req.body || {}
+    const newCode = code.toLowerCase()
+    const update = await CategoryModal.findByIdAndUpdate(
+        _id,
+        { name, code: newCode, description, },
+        { new: true }
+    );
+    return _res.json(success(update))
 
 }
 const getCategory = async (_req, _res) => {
@@ -46,7 +57,26 @@ const getCategory = async (_req, _res) => {
                 data: [
                     { $sort: { createdAt: 1 } },
                     { $skip: skip },
-                    { $limit: limit }
+                    { $limit: limit },
+                    {
+                        $lookup: {
+                            from: "menus",
+                            let: { categoryId: "$_id", vendorId: "$vendor" },
+                            pipeline: [
+                                {
+                                    $match: {
+                                        $expr: {
+                                            $and: [
+                                                { $eq: ["$category_id", "$$categoryId"] },
+                                                { $eq: ["$vendor", "$$vendorId"] }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ],
+                            as: "menuData"
+                        }
+                    }
                 ],
                 totalCount: [
                     { $count: "count" }
@@ -65,4 +95,4 @@ const getCategory = async (_req, _res) => {
     ))
 
 }
-module.exports = { addCategory, getCategory }
+module.exports = { addCategory, getCategory, updateCategory }

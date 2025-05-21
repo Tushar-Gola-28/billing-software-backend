@@ -6,6 +6,11 @@ const menuSchema = new mongoose.Schema({
         ref: 'categories',
         required: true,
     },
+    vendor: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'users',
+        required: true,
+    },
     note: {
         type: String,
         required: true
@@ -13,15 +18,17 @@ const menuSchema = new mongoose.Schema({
     code: {
         type: String,
         required: true,
-        unique: true
+    },
+    name: {
+        type: String,
+        required: true,
     },
     handle: {
         type: String,
         required: true,
-        unique: true
     },
     qty: {
-        type: String,
+        type: Number,
         required: true,
     },
     price: {
@@ -51,8 +58,19 @@ const menuSchema = new mongoose.Schema({
     },
     status: {
         type: Boolean,
-        default: true
-    }
+        default: true,
+        enum: [true, false]
+    },
+    gst_percentage: {
+        type: Number,  // For example: 5 means 5%
+        required: true,
+        min: 0,
+        max: 100,
+    },
+    total_price_with_gst: {
+        type: Number,  // For example: 5 means 5%
+        required: true,
+    },
 },
     {
         timestamps: true // Automatically adds createdAt and updatedAt

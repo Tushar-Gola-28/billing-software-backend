@@ -3,8 +3,7 @@ const cors = require("cors")
 const configureCors = () => {
     return cors({
         origin: (origin, callback) => {
-            const allowOrigin = ["https://localhost:3001","http://localhost:3001"]
-            console.log(allowOrigin.includes(origin), origin);
+            const allowOrigin = ["https://localhost:3001","http://localhost:3000","http://localhost:3001"]
 
             if (!origin || allowOrigin.includes(origin)) {
                 callback(null, true)
