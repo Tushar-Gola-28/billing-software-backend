@@ -18,7 +18,13 @@ const addOnSchema = new mongoose.Schema({
     handle: {
         type: String,
         required: true,
-        unique: true
+    },
+    name: {
+        type: String,
+        required: true,
+    },
+    addOnPrice: {
+        type: Number,
     },
     price: {
         type: Number,

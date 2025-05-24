@@ -1,10 +1,9 @@
 const { default: mongoose } = require("mongoose")
 const { success, handleConverter, success_with_page, error } = require("../../functions/functions")
-const { CategoryModal } = require("../../schemas/category")
 const { MenusModal } = require("../../schemas/menu")
 
 const addMenu = async (_req, _res) => {
-    const { category_id, note, code, qty, price, name, discount, image, type, status } = _req.body || {}
+    const { category_id, note, code, qty, price, name, discount, image, type, status, total_price_with_gst, gst_percentage } = _req.body || {}
     const vendor = _req.headers["parent"]
     const newCode = code.toLowerCase()
     const exist = await MenusModal.findOne({
@@ -18,18 +17,17 @@ const addMenu = async (_req, _res) => {
     if (exist) {
         return _res.status(400).json(error(400, `Menu Already exist! Please enter unique menu details.`))
     }
-    const create = new MenusModal({ name, code: newCode, note, handle: handleConverter(name), vendor, category_id, price, qty, discount, image, type, status })
+    const create = new MenusModal({ name, code: newCode, note, handle: handleConverter(name), vendor, category_id, price, qty, discount, image, type, status, total_price_with_gst, gst_percentage })
     await create.save()
     return _res.json(success(create))
 
 }
 const updateMenu = async (_req, _res) => {
-    const { category_id, note, code, qty, price, name, discount, image, type, status, _id } = _req.body || {}
+    const { category_id, note, code, qty, price, name, discount, image, type, status, _id, total_price_with_gst, gst_percentage } = _req.body || {}
     const newCode = code.toLowerCase()
     const vendor = _req.headers["parent"]
-    // Fetch current menu item
+    const handle = handleConverter(name)
     const currentMenu = await MenusModal.findById(_id);
-
     if (!currentMenu) {
         return _res.status(404).json(error(404, "Menu item not found."));
     }
@@ -38,12 +36,10 @@ const updateMenu = async (_req, _res) => {
     if (isNameChanged || isCodeChanged) {
         const exist = await MenusModal.findOne({
             vendor,
-            _id: { $ne: _id }, // exclude the current item
-            $or: [
-                isNameChanged ? { name } : null,
-                isCodeChanged ? { code: newCode } : null
-            ].filter(Boolean)
+            _id: { $ne: _id },
+            handle,
         });
+
 
         if (exist) {
             return _res.status(400).json(error(400, "Menu already exists with this name or code."));
@@ -61,12 +57,15 @@ const updateMenu = async (_req, _res) => {
             discount,
             image,
             type,
-            status
+            status,
+            total_price_with_gst,
+            gst_percentage
 
         },
         { new: true }
 
     )
+
     return _res.json(success(update))
 
 }
@@ -136,4 +135,13 @@ const getMenus = async (_req, _res) => {
     ))
 
 }
-module.exports = { addMenu, getMenus, updateMenu }
+const getActiveMenus = async (_req, _res) => {
+    let vendor = _req.headers["parent"]
+    vendor = new mongoose.Types.ObjectId(vendor);
+    const menus = await MenusModal.find({ vendor, status: true })
+    return _res.json(success(
+        menus,
+    ))
+
+}
+module.exports = { addMenu, getMenus, updateMenu, getActiveMenus }

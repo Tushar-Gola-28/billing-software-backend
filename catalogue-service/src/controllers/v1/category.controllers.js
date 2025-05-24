@@ -20,8 +20,13 @@ const addCategory = async (_req, _res) => {
     const create = new CategoryModal({ name, code: newCode, description, handle: handleConverter(name), vendor })
     await create.save()
     return _res.json(success(create))
-
 }
+const getActiveCategory = async (_req, _res) => {
+    let vendor = _req.headers["parent"]
+    const categories = await CategoryModal.find({ vendor, status: true }, { _id: 1, name: 1, code: 1 })
+    return _res.json(success(categories))
+}
+
 const updateCategory = async (_req, _res) => {
     const { name, code, description, _id } = _req.body || {}
     const newCode = code.toLowerCase()
@@ -95,4 +100,4 @@ const getCategory = async (_req, _res) => {
     ))
 
 }
-module.exports = { addCategory, getCategory, updateCategory }
+module.exports = { addCategory, getCategory, updateCategory, getActiveCategory }

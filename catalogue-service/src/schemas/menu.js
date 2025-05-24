@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
-
+const { customAlphabet } = require('nanoid');
+const nanoid = customAlphabet('1234567890abcdefghijklmnopqrst', 10);
 const menuSchema = new mongoose.Schema({
     category_id: {
         type: mongoose.Schema.Types.ObjectId,
@@ -30,6 +31,11 @@ const menuSchema = new mongoose.Schema({
     qty: {
         type: Number,
         required: true,
+    },
+    usedQty: {
+        type: Number,
+        required: true,
+        default: 0
     },
     price: {
         type: Number,
@@ -70,6 +76,11 @@ const menuSchema = new mongoose.Schema({
     total_price_with_gst: {
         type: Number,  // For example: 5 means 5%
         required: true,
+    },
+    menu_tracking_id: {
+        type: String,
+        unique: true,
+        default: () => `menu_${nanoid()}`
     },
 },
     {

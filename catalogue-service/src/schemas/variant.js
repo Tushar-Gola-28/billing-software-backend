@@ -1,9 +1,15 @@
 const mongoose = require('mongoose');
-
+const { customAlphabet } = require('nanoid');
+const nanoid = customAlphabet('1234567890abcdefghijklmnopqrst', 10);
 const variantSchema = new mongoose.Schema({
     menu_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'menus',
+        required: true,
+    },
+    vendor: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'users',
         required: true,
     },
     note: {
@@ -13,7 +19,6 @@ const variantSchema = new mongoose.Schema({
     handle: {
         type: String,
         required: true,
-        unique: true
     },
     name: {
         type: String,
@@ -35,13 +40,20 @@ const variantSchema = new mongoose.Schema({
         type: Number,
         default: 1
     },
-    addOnPrice: {
-        type: Number,
-        default: 0
-    },
     minQty: {
         type: Number,
         default: 0
+    },
+    menu_tracking_id: {
+        type: String,
+        unique: true,
+        default: () => `variant_${nanoid()}`
+    },
+    type: {
+        type: String,
+        required: true,
+        enum: ["veg", "non-veg"]
+
     },
 
 },
@@ -50,6 +62,5 @@ const variantSchema = new mongoose.Schema({
     });
 // ✅ Compound unique index: menu_id + name
 variantSchema.index({ menu_id: 1, name: 1 }, { unique: true });
-variantSchema.index({ menu_id: 1, index: 1 }, { unique: true });
 const VariantModal = mongoose.model('variants', variantSchema);
 module.exports = { VariantModal }
