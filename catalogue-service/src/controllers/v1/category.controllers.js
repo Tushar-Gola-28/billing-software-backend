@@ -36,9 +36,8 @@ const getActiveCategory = async (_req, _res) => {
     const categories = await CategoryModal.find({ vendor, status: true }, { _id: 1, name: 1, code: 1 })
     return _res.json(success(categories))
 }
-
 const updateCategory = async (_req, _res) => {
-    const { name, code, description, _id } = _req.body || {}
+    const { name, code, description, _id, status } = _req.body || {}
     if (!name.trim()) {
         return _res.status(400).json(error(400, `Name is required.`))
     }
@@ -52,7 +51,7 @@ const updateCategory = async (_req, _res) => {
     const updatedBy = _req.headers["user"]
     const update = await CategoryModal.findByIdAndUpdate(
         _id,
-        { name, code: newCode, description, updatedBy },
+        { name, code: newCode, description, updatedBy, status },
         { new: true }
     );
     return _res.json(success(update))

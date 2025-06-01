@@ -107,9 +107,9 @@ const updateMenu = async (_req, _res) => {
         return _res.status(400).json(error(400, "Invalid or missing 'type'. It must be a string."))
     }
 
-    if (!status || typeof status !== "string") {
-        return _res.status(400).json(error(400, "Invalid or missing 'status'. It must be a string."))
-    }
+    // if (!status || typeof status !== "string") {
+    //     return _res.status(400).json(error(400, "Invalid or missing 'status'. It must be a string."))
+    // }
 
     if (total_price_with_gst !== undefined && (typeof total_price_with_gst !== "number" || total_price_with_gst < 0)) {
         return _res.status(400).json(error(400, "'total_price_with_gst' must be a non-negative number if provided."))
@@ -169,7 +169,6 @@ const updateMenu = async (_req, _res) => {
     return _res.json(success(update))
 
 }
-
 const getMenus = async (_req, _res) => {
     let vendor = _req.headers["parent"]
     vendor = new mongoose.Types.ObjectId(vendor);

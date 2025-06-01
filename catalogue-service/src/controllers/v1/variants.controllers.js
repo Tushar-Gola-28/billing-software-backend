@@ -59,12 +59,13 @@ const updateVariants = async (_req, _res) => {
     const { name, menu_id, status, isMultiple, minQty, note, type, _id } = _req.body || {}
     let vendor = _req.headers["parent"]
     const updatedBy = _req.headers["user"]
+
     // === Required Field Validations ===
     if (!vendor || typeof vendor !== "string") {
         return _res.status(400).json(error(400, "Missing or invalid 'vendor' in headers."))
     }
 
-    if (!updatedBy || typeof user !== "string") {
+    if (!updatedBy || typeof updatedBy !== "string") {
         return _res.status(400).json(error(400, "Missing or invalid 'user' in headers."))
     }
 
@@ -304,7 +305,6 @@ const getAddons = async (_req, _res) => {
     const total = result[0].totalCount[0]?.count || 0;
     return _res.json(success_with_page(addons, total, page, limit, Math.ceil(total / limit)))
 }
-
 const getVariantsById = async (_req, _res) => {
     const { variant } = _req.params || {}
     if (!variant) {
@@ -339,9 +339,10 @@ const getMenuVariants = async (_req, _res) => {
 
 }
 const addVariantsAddOns = async (_req, _res) => {
-    const { data, menu_id } = _req.body || {}
+    const { data, menu_id, type } = _req.body || {}
     let vendor = _req.headers["parent"]
     let user = _req.headers["user"]
+    let updatedBy = _req.headers["user"]
     await AddOnModal.deleteMany({ menu_id });
     const operations = data.flatMap((it) => it.addOns.map((ite) => {
         return {
@@ -353,7 +354,8 @@ const addVariantsAddOns = async (_req, _res) => {
                     price: ite.price ? Number(ite.price) : 0,
                     status: ite.status == "true" || ite.status == true ? true : false,
                     vendor,
-                    user
+                    user,
+                    updatedBy: type == "update" ? updatedBy : undefined
 
                 }
             }
