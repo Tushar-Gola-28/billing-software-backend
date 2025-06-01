@@ -102,7 +102,7 @@ const addVendorCustomer = async (_req, _res) => {
 
 const verifyUserById = async (_req, _res) => {
     const { id: _id } = _req.params
-    const existUser = await UserModal.findOne({ _id })
+    const existUser = await UserModal.findOne({ _id }, { password: 0, loginCount: 0, type: 0, inActiveReason: 0, createdAt: 0, updatedAt: 0, role: 0, parent: 0 })
     if (!existUser) {
         return _res.status(400).json(error(400, "Not Exist"))
     }

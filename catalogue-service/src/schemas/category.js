@@ -10,6 +10,15 @@ const categorySchema = new mongoose.Schema({
         ref: 'users',
         required: true,
     },
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'users',
+        required: true,
+    },
+    updatedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'users',
+    },
     description: {
         type: String,
         required: true

@@ -11,6 +11,17 @@ const addOnSchema = new mongoose.Schema({
         ref: 'variants',
         required: true,
     },
+    vendor: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'users',
+        required: true,
+    },
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'users',
+        required: true,
+    },
+
     note: {
         type: String,
         required: true

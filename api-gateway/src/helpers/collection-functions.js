@@ -6,11 +6,8 @@ const getVersionsByCode = async (feature, version) => {
     let parseData = findVersion ? JSON.parse(findVersion) : ""
     let versionData
     if (!parseData) {        
-        versionData = await VersionModal.findOne({ code: version, featureName: feature })
-        console.log(versionData,"Db Data");
-        
+        versionData = await VersionModal.findOne({ code: version, featureName: feature })        
     } else {
-        console.log(versionData,"Redis Data");
         versionData = parseData.find((it) => it.code == version && it.featureName == feature)
     }
     

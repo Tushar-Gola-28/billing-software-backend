@@ -12,6 +12,15 @@ const menuSchema = new mongoose.Schema({
         ref: 'users',
         required: true,
     },
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'users',
+        required: true,
+    },
+    updatedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'users',
+    },
     note: {
         type: String,
         required: true
