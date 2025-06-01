@@ -6,6 +6,7 @@ const { globalErrorhandler } = require("./middleware/error-handler")
 const customerRoute = require("./routes/v1/customer.route")
 const planRoute = require("./routes/v1/plan.route")
 const { connectDb } = require("./config/db/config")
+const { redisCall } = require("./config/redis")
 const app = express()
 const PORT = process.env.PORT
 app.use(requestLogger)
@@ -18,3 +19,4 @@ app.listen(PORT, () => {
     console.log(`Customer service listening on http://localhost:${PORT} ${process.env.BASE_PATH}`);
 })
 connectDb()
+redisCall()

@@ -1,5 +1,6 @@
 const axios = require("axios")
 const { decodeToken, error, decodeRefreshToken } = require("../functions/functions");
+const { baseRedisClient } = require("../cache/redis");
 const verifyToken = async (req, res, next) => {
     try {
         if (!req.originalUrl.includes("no-auth")) {
@@ -28,12 +29,30 @@ const verifyToken = async (req, res, next) => {
             if (!decodeTkn.payload.id) {
                 return res.status(400).json(error("Invalid token"))
             }
+            // ✅ Redis session check
+            const email = decodeTkn.payload.email;
+            const sessionKey = `sessions:${email}`;
+            const sessions = await baseRedisClient.lRange(sessionKey, 0, -1);
+
+            const isValidSession = sessions.find((sessionStr) => {
+                try {
+                    const session = JSON.parse(sessionStr);
+                    return session.accessToken == token || session.refreshToken == token;
+                } catch {
+                    return false;
+                }
+            });
+
+            if (!isValidSession && !req.originalUrl.includes("logout")) {
+                return res.status(440).json(error(440, "Session expired or logged out from server."));
+            }
 
             await axios.get(`${process.env.CUSTOMER_SERVICE_URL}/no-auth/verify/${decodeTkn.payload.id}`)
             req.user = decodeTkn.payload.id;
             req.role = decodeTkn.payload.role;
             req.type = decodeTkn.payload.type;
             req.plan_id = decodeTkn.payload.plan_id;
+            req.token = token;
             req.parent = decodeTkn.payload.parent || decodeTkn.payload.id;
 
         }

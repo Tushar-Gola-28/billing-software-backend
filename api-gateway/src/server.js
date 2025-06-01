@@ -44,6 +44,7 @@ app.use('/service', (req, res, next) => {
     const suffix = req.originalUrl.replace(/^\/service/, '').split("/")
     const feature = suffix[1]
     return proxy(serviceMap[feature], {
+        cookieDomainRewrite: '',
         proxyReqPathResolver: req => {
             const suffix = req.originalUrl.replace(/^\/service/, '').split("/")
             const feature = suffix[1]
@@ -59,6 +60,7 @@ app.use('/service', (req, res, next) => {
                 proxyReqOpts.headers['type'] = srcReq.type;
                 proxyReqOpts.headers['role'] = srcReq.role;
                 proxyReqOpts.headers['parent'] = srcReq.parent;
+                proxyReqOpts.headers['token'] = srcReq.token;
             }
             return proxyReqOpts;
         },
