@@ -4,21 +4,15 @@ const { baseRedisClient } = require("../cache/redis");
 const verifyToken = async (req, res, next) => {
     try {
         if (!req.originalUrl.includes("no-auth")) {
-            // if (!req.headers["authorization"]) {
-            //     return res.status(401).json(error(401, "Unauthorized: Missing Authorization header"));
-            // }
-            let token;
-            let decodeTkn
-            if (req.headers["authorization"]) {
-                token = req.headers["authorization"].split(" ")[1]
-                // console.log(token);
 
-                decodeTkn = decodeToken(token)
-            }
+            let token;
+
+            let decodeTkn
             if (!token && req.cookies.refresh_token) {
                 token = req.cookies.refresh_token
                 decodeTkn = decodeRefreshToken(token)
             }
+
 
             if (!token) {
                 return res.status(401).json(error(401, "Unauthorized: No token provided"))

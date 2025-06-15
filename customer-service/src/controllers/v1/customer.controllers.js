@@ -138,9 +138,6 @@ const suggestUserOnlyCustomer = async (_req, _res) => {
 }
 const loginUser = async (_req, _res) => {
     const { email, password } = _req.body;
-    console.log(email);
-
-
     const existUser = await UserModal.findOne({ email });
     if (!existUser) {
         return _res.status(400).json(error(400, "Please check your credential."));
@@ -151,12 +148,6 @@ const loginUser = async (_req, _res) => {
         return _res.status(400).json(error(400, "Invalid password."));
     }
 
-    // // Check login limit
-    // if (existUser.loginCount >= 5) {
-    //     return _res.status(400).json(error(400, "Oops! You've reached the limit of 5 devices. Please log out from another device to continue."));
-    // }
-
-    // Generate tokens
     const planDetails = await CustomerPlanModal.findOne({ customer_id: existUser._id, status: true });
     const payload = { id: existUser._id, mobile: existUser.mobile, plan_id: planDetails?.plan_id, email: existUser?.email, role: existUser.role, type: existUser.type, parent: existUser.parent };
     const accessToken = generateToken(payload);

@@ -160,4 +160,88 @@ const getCategory = async (_req, _res) => {
     ))
 
 }
-module.exports = { addCategory, getCategory, updateCategory, getActiveCategory }
+
+
+const getActiveMenuAndCategory = async (_req, _res) => {
+    let vendor = _req.headers["parent"]
+    vendor = new mongoose.Types.ObjectId(vendor);
+    const search = _req.query.search || "";
+    const s = {}
+    const m = {}
+    if (search) {
+        s.$or = [
+            { code: { $regex: search, $options: "i" } }
+        ]
+    }
+
+    if (search) {
+        m.$or = [
+            { "menus.code": { $regex: search, $options: "i" } }
+        ]
+    }
+    const result = await CategoryModal.aggregate([
+        {
+            $match: {
+                vendor: vendor,
+                status: true,
+                ...s
+            }
+        },
+        {
+            $lookup: {
+                from: "menus",
+                localField: "_id",
+                foreignField: "category_id",
+                as: "menus"
+            }
+        },
+        { $unwind: "$menus" },
+        {
+            $match: {
+                ...m
+            }
+        },
+        {
+            $lookup: {
+                from: "variants",
+                let: { menuId: "$menus._id" },
+                pipeline: [
+                    {
+                        $match: {
+                            $expr: { $eq: ["$menu_id", "$$menuId"] }
+                        }
+                    },
+                    {
+                        $lookup: {
+                            from: "addons",
+                            localField: "_id",
+                            foreignField: "variant_id",
+                            as: "addons"
+                        }
+                    }
+                ],
+                as: "menus.variants"
+            }
+        },
+        {
+            $group: {
+                _id: "$_id",
+                vendor: { $first: "$vendor" },
+                name: { $first: "$name" },
+                status: { $first: "$status" },
+                code: { $first: "$code" },
+                description: { $first: "$description" },
+                menus: { $push: "$menus" }
+            }
+        }
+    ]
+
+    );
+
+
+    return _res.json(success(
+        result,
+    ))
+
+}
+module.exports = { addCategory, getCategory, updateCategory, getActiveCategory, getActiveMenuAndCategory }
