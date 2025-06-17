@@ -179,12 +179,18 @@ const getActiveMenuAndCategory = async (_req, _res) => {
             { "menus.code": { $regex: search, $options: "i" } }
         ]
     }
+
     const result = await CategoryModal.aggregate([
         {
             $match: {
                 vendor: vendor,
                 status: true,
                 ...s
+            }
+        },
+        {
+            $sort: {
+                createdAt: -1
             }
         },
         {
@@ -208,7 +214,8 @@ const getActiveMenuAndCategory = async (_req, _res) => {
                 pipeline: [
                     {
                         $match: {
-                            $expr: { $eq: ["$menu_id", "$$menuId"] }
+                            $expr: { $eq: ["$menu_id", "$$menuId"] },
+                            status: true,
                         }
                     },
                     {
